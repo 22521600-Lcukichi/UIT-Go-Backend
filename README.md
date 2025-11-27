@@ -1,4 +1,4 @@
-# SND PROJECT
+# UIT-Go PROJECT
  ### QUY TẮC LÀM VIỆC TRÊN GITHUB
  - Khuyến khích tạo 2 nhánh trên code gồm nhánh master và nhánh của mình. Nhánh master chỉ dùng để theo dõi mọi việc viết code thực hiện trên nhánh riêng của mình.
  - Trước khi bắt đầu làm, kiểm tra nhánh master nếu có thay đổi thì pull về nhánh master local
