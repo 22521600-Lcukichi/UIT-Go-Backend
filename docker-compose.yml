@@ -1,7 +1,5 @@
-version: '3.8'
-
-# Docker Compose tổng cho toàn bộ hệ thống microservice UIT-Go
-# Chạy tất cả services: user-service, trip-service, databases
+# Docker Compose cho UIT-Go Backend Service
+# Chạy user-service với authentication và driver profile management
 
 services:
   # ==========================================
@@ -9,7 +7,7 @@ services:
   # ==========================================
   user-service:
     build:
-      context: ./services/user_service
+      context: ./user_service
       dockerfile: Dockerfile
     container_name: uit-go-user-service
     environment:
@@ -22,11 +20,8 @@ services:
       # JWT và security - Lấy từ .env file
       - SECRET_KEY=${SECRET_KEY:-django-insecure-dev-key-change-in-production}
       - JWT_SECRET=${JWT_SECRET:-your-jwt-secret-key-change-in-production}
-      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:-internal-service-token-dev}
       # CORS và hosts
       - ALLOWED_HOSTS=${ALLOWED_HOSTS:-*}
-      # Service URLs để giao tiếp giữa services
-      - TRIP_SERVICE_URL=http://trip-service:8002
     ports:
       - "8001:8001"  # Port để external access
     depends_on:
@@ -36,43 +31,8 @@ services:
       - uit-go-network
     restart: unless-stopped
     volumes:
-      - ./services/user_service:/app  # Mount source code để dev
+      - ./user_service:/app  # Mount source code để dev
     command: python manage.py runserver 0.0.0.0:8001
-
-  # ==========================================
-  # Trip Service - Quản lý trips, bookings
-  # ==========================================
-  trip-service:
-    build:
-      context: ./services/trip_services
-      dockerfile: Dockerfile
-    container_name: uit-go-trip-service
-    environment:
-      # Database config - Lấy từ .env file hoặc dùng giá trị mặc định
-      - DB_NAME=${TRIP_DB_NAME:-trip_service}
-      - DB_USER=${TRIP_DB_USER:-postgres}
-      - DB_PASSWORD=${TRIP_DB_PASSWORD:-postgres123}
-      - DB_HOST=trip-db
-      - DB_PORT=5432
-      # JWT và security - Lấy từ .env file
-      - SECRET_KEY=${SECRET_KEY:-django-insecure-dev-key-change-in-production}
-      - JWT_SECRET=${JWT_SECRET:-your-jwt-secret-key-change-in-production}
-      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:-internal-service-token-dev}
-      # CORS và hosts
-      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-*}
-      # Service URLs để giao tiếp với user service
-      - USER_SERVICE_URL=http://user-service:8001
-    ports:
-      - "8002:8002"  # Port để external access
-    depends_on:
-      trip-db:
-        condition: service_healthy
-    networks:
-      - uit-go-network
-    restart: unless-stopped
-    volumes:
-      - ./services/trip_services:/app  # Mount source code để dev
-    command: python manage.py runserver 0.0.0.0:8002
 
   # ==========================================
   # Database cho User Service
@@ -86,7 +46,7 @@ services:
       POSTGRES_USER: ${USER_DB_USER:-postgres}
       POSTGRES_PASSWORD: ${USER_DB_PASSWORD:-postgres123}
     ports:
-      - "5432:5432"  # Chỉ expose cho dev, production nên ẩn
+      - "5432:5432"  
     volumes:
       - user-db-data:/var/lib/postgresql/data
     healthcheck:
@@ -99,31 +59,7 @@ services:
     restart: unless-stopped
 
   # ==========================================
-  # Database cho Trip Service
-  # ==========================================
-  trip-db:
-    image: postgres:15-alpine
-    container_name: uit-go-trip-db
-    environment:
-      # Database config - Lấy từ .env file hoặc dùng giá trị mặc định
-      POSTGRES_DB: ${TRIP_DB_NAME:-trip_service}
-      POSTGRES_USER: ${TRIP_DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${TRIP_DB_PASSWORD:-postgres123}
-    ports:
-      - "5433:5432"  # Port khác để tránh conflict
-    volumes:
-      - trip-db-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${TRIP_DB_USER:-postgres} -d ${TRIP_DB_NAME:-trip_service}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - uit-go-network
-    restart: unless-stopped
-
-  # ==========================================
-  # pgAdmin để quản lý databases (tùy chọn)
+  # pgAdmin để quản lý databases
   # ==========================================
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -132,7 +68,8 @@ services:
       # pgAdmin config - Lấy từ .env file hoặc dùng giá trị mặc định
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@uitgo.com}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_SERVER_MODE: 'True'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
     ports:
       - "5050:80"
     volumes:
@@ -140,19 +77,15 @@ services:
     networks:
       - uit-go-network
     depends_on:
-      - user-db
-      - trip-db
+      user-db:
+        condition: service_healthy
     restart: unless-stopped
-    profiles:
-      - dev  # Chỉ chạy khi: docker-compose --profile dev up
 
 # ==========================================
 # Volumes để lưu trữ dữ liệu persistent
 # ==========================================
 volumes:
   user-db-data:
-    driver: local
-  trip-db-data:
     driver: local
   pgadmin-data:
     driver: local
