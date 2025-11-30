@@ -72,3 +72,27 @@ xế
   - PostgreSQL: Được sử dụng để cập nhật trạng thái chuyến đi (update/trip, cancel/trip) và lưu trữ dữ liệu có cấu trúc lịch sử chuyến nhằm đảm bảo tính toàn vẹn
 - Cơ chế khóa (Locking): Sử dụng Distributed Lock (Redis lock) hoặc ràng buộc Database để ngăn chặn lỗi "Race condition" (ví dụ: 2 tài xế cùng nhận 1 chuyến).
 
+---
+
+## 🏗 Kiến trúc hệ thống
+
+```
+┌─────────────────┐
+│  User Service   │  ← Django REST API (Port 8001)
+│  - Auth         │
+│  - Drivers      │
+│  - Admin        │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│   PostgreSQL    │  ← Database (Port 5432)
+│   (user-db)     │
+└─────────────────┘
+         │
+         ▼
+┌─────────────────┐
+│    pgAdmin     │  ← Database Management (Port 5050)
+└─────────────────┘
+```
+
