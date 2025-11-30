@@ -15,8 +15,7 @@ triển khai và kiểm thử các thành phần microservices trong kiến trú
 3. [Kiến trúc hệ thống](#architecture)
 4. [Công nghệ sử dụng](#technology-stack)
 5. [Cài đặt & Thiết lập](#installation--setup)
-6. [Chạy ứng dụng](#running-the-application)
-7. [Kiểm thử giao tiếp giữa các dịch vụ](#testing-inter-service-communication)
+6. [Kiểm thử giao tiếp giữa các dịch vụ](#testing-inter-service-communication)
 8. [Cấu trúc dự án](#project-structure)
 9. [Hướng dẫn phát triển](#development-guide)
 10. [Xử lý sự cố](#troubleshooting)
@@ -195,3 +194,40 @@ docker compose logs -f user-service
 - **API Base URL**: `http://localhost:8001`
 - **Django Admin**: `http://localhost:8001/admin/`
 - **pgAdmin**: `http://localhost:5050` (Email: `admin@uitgo.com`, Password: `admin123`)
+  
+---
+
+## 🧪 Kiểm thử giao tiếp giữa các dịch vụ
+
+### **1. Dùng Postman**
+- Tạo collection với các endpoints
+- Set environment variables
+- Test các endpoints
+
+### **2. Dùng Browsable API**
+- Truy cập: `http://localhost:8001/api/auth/register/`
+- Điền form và submit
+- Authorize với token để test protected APIs
+
+### **3. Dùng cURL**
+```bash
+# Register
+curl -X POST http://localhost:8001/api/auth/register/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@example.com",
+    "password": "Test123456",
+    "password_confirm": "Test123456",
+    "full_name": "Test User",
+    "phone": "0901234567",
+    "user_type": "passenger"
+  }'
+
+# Login
+curl -X POST http://localhost:8001/api/auth/login/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@example.com",
+    "password": "Test123456"
+  }'
+```
