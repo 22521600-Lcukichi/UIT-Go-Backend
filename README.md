@@ -159,6 +159,39 @@ git clone <repository-url>
 cd "SE360 UIT-GO"
 ```
 
-```text
-|-
+## 3. Tạo file .env ở thư mục gốc (tùy chọn)
+
+```bash
+cat > .env << 'EOF'
+SECRET_KEY=django-insecure-dev-key-change-in-production
+JWT_SECRET=your-jwt-secret-key-change-in-production
+USER_DB_NAME=user_service
+USER_DB_USER=postgres
+USER_DB_PASSWORD=postgres123
+ALLOWED_HOSTS=*
+PGADMIN_EMAIL=admin@uitgo.com
+PGADMIN_PASSWORD=admin123
+EOF
 ```
+
+## 4. Chạy hệ thống với Docker Compose
+
+```bash
+# Build và khởi động tất cả services
+docker compose up -d --build
+
+# Chạy migrations
+docker compose exec user-service python manage.py migrate
+
+# Tạo tài khoản superuser (chỉ lần đầu)
+docker compose exec user-service python manage.py createsuperuser
+# Email: admin@uitgo.com, Password: admin123 (hoặc tùy chỉnh)
+
+# Xem logs
+docker compose logs -f user-service
+```
+
+## 5. Truy cập services
+- **API Base URL**: `http://localhost:8001`
+- **Django Admin**: `http://localhost:8001/admin/`
+- **pgAdmin**: `http://localhost:5050` (Email: `admin@uitgo.com`, Password: `admin123`)
