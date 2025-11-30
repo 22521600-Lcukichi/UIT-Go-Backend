@@ -24,3 +24,10 @@ triển khai và kiểm thử các thành phần microservices trong kiến trú
 12. [Tài liệu](#documentation)
 13. [Thành viên nhóm](#team-members)
 14. [Giấy phép](#license)
+
+---
+
+## 📖 Tổng quan dự án
+
+Ứng dụng UIT-Go được xây dựng với hai nhóm người dùng chính: Hành khách và Tài
+xế
