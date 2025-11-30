@@ -68,7 +68,7 @@ xế
 - Framework: Node.js
 - Database:
 
- - MongoDB: Lưu trữ thông tin chi tiết chuyến đi (Trip Document) trong quá trình xử lý.
- - PostgreSQL: Được sử dụng để cập nhật trạng thái chuyến đi (update/trip, cancel/trip) và lưu trữ dữ liệu có cấu trúc lịch sử chuyến nhằm đảm bảo tính toàn vẹn
+  - MongoDB: Lưu trữ thông tin chi tiết chuyến đi (Trip Document) trong quá trình xử lý.
+  - PostgreSQL: Được sử dụng để cập nhật trạng thái chuyến đi (update/trip, cancel/trip) và lưu trữ dữ liệu có cấu trúc lịch sử chuyến nhằm đảm bảo tính toàn vẹn
 - Cơ chế khóa (Locking): Sử dụng Distributed Lock (Redis lock) hoặc ràng buộc Database để ngăn chặn lỗi "Race condition" (ví dụ: 2 tài xế cùng nhận 1 chuyến).
 
