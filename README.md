@@ -46,4 +46,8 @@ xế
 
 - Xác thực & Bảo mật:
 
+   - AWS Cognito: Quản lý định danh (User Pool), chính sách mật khẩu và MFA (Multi-Factor Authentication) thay vì tự xây dựng hệ thống auth.
+   - JWT (JSON Web Token): Dùng để xác thực phiên đăng nhập.
+   - AWS Secrets Manager: Quản lý thông tin đăng nhập database (credentials) để bảo mật.
+
 
