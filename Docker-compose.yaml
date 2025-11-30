@@ -1,0 +1,159 @@
+version: "3.9"
+
+services:
+  # ==========================================================
+  # API Gateway
+  # ==========================================================
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    environment:
+      - DRIVER_SERVICE_URL=${DRIVER_SERVICE_URL}
+      - TRIP_SERVICE_URL=${TRIP_SERVICE_URL}
+    ports:
+      - "3000:3000"
+    networks:
+      - uit-go-network
+    restart: unless-stopped
+
+  # ==========================================================
+  # Trip Service
+  # ==========================================================
+  trip-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: trip-service
+    environment:
+      - DRIVER_SERVICE_URL=${DRIVER_SERVICE_URL}
+      - TRIP_SERVICE_URL=${TRIP_SERVICE_URL}
+      - URL_MONGODB_SERVER=${URL_MONGODB_SERVER}
+    ports:
+      - "3004:3004"
+    networks:
+      - uit-go-network
+    restart: unless-stopped
+
+  # ==========================================================
+  # Driver Service
+  # ==========================================================
+  driver-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: driver-service   # sửa lỗi bạn để trùng trip-service
+    environment:
+      - DRIVER_SERVICE_URL=${DRIVER_SERVICE_URL}
+      - TRIP_SERVICE_URL=${TRIP_SERVICE_URL}
+      - URL_MONGODB_SERVER=${URL_MONGODB_SERVER}
+    ports:
+      - "3003:3003"
+    networks:
+      - uit-go-network
+    restart: unless-stopped
+
+  # ==========================================================
+  # User Service (Django)
+  # ==========================================================
+  user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: uit-go-user-service
+    environment:
+      - DB_NAME=${USER_DB_NAME:-user_service}
+      - DB_USER=${USER_DB_USER:-postgres}
+      - DB_PASSWORD=${USER_DB_PASSWORD:-postgres123}
+      - DB_HOST=user-db
+      - DB_PORT=5432
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-dev-key-change-in-production}
+      - JWT_SECRET=${JWT_SECRET:-your-jwt-secret-key-change-in-production}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-*}
+    ports:
+      - "8001:8001"
+    depends_on:
+      user-db:
+        condition: service_healthy
+    networks:
+      - uit-go-network
+    volumes:
+      - .:/app
+    command: python manage.py runserver 0.0.0.0:8001
+    restart: unless-stopped
+
+  # ==========================================================
+  # PostgreSQL Database cho User Service
+  # ==========================================================
+  user-db:
+    image: postgres:15-alpine
+    container_name: uit-go-user-db
+    environment:
+      POSTGRES_DB: ${USER_DB_NAME:-user_service}
+      POSTGRES_USER: ${USER_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${USER_DB_PASSWORD:-postgres123}
+    ports:
+      - "5432:5432"
+    networks:
+      - uit-go-network
+    volumes:
+      - user-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${USER_DB_USER:-postgres} -d ${USER_DB_NAME:-user_service}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ==========================================================
+  # pgAdmin 4
+  # ==========================================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: uit-go-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@uitgo.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
+      PGADMIN_CONFIG_SERVER_MODE: 'True'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    ports:
+      - "5050:80"
+    networks:
+      - uit-go-network
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      user-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ==========================================================
+  # MongoDB — bạn chưa đưa cấu hình nên để placeholder
+  # ==========================================================
+  mongodb:
+    image: mongo:latest
+    container_name: uit-go-mongodb
+    ports:
+      - "27017:27017"
+    networks:
+      - uit-go-network
+    volumes:
+      - mongo-data:/data/db
+    restart: unless-stopped
+
+
+# ==========================================================
+# Volumes
+# ==========================================================
+volumes:
+  user-db-data:
+  pgadmin-data:
+  mongo-data:
+
+# ==========================================================
+# Networks
+# ==========================================================
+networks:
+  uit-go-network:
+    driver: bridge
