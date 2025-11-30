@@ -31,3 +31,9 @@ triển khai và kiểm thử các thành phần microservices trong kiến trú
 
 Ứng dụng UIT-Go được xây dựng với hai nhóm người dùng chính: Hành khách và Tài
 xế
+
+---
+
+## 🔑 Các tính năng chính
+
+1. 
