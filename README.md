@@ -14,16 +14,15 @@ triển khai và kiểm thử các thành phần microservices trong kiến trú
 2. [Các tính năng chính](#key-features)
 3. [Kiến trúc hệ thống](#architecture)
 4. [Công nghệ sử dụng](#technology-stack)
-5. [Yêu cầu tiên quyết](#prerequisites)
-6. [Cài đặt & Thiết lập](#installation--setup)
-7. [Chạy ứng dụng](#running-the-application)
-8. [Kiểm thử giao tiếp giữa các dịch vụ](#testing-inter-service-communication)
-9. [Cấu trúc dự án](#project-structure)
-10. [Hướng dẫn phát triển](#development-guide)
-11. [Xử lý sự cố](#troubleshooting)
-12. [Tài liệu](#documentation)
-13. [Thành viên nhóm](#team-members)
-14. [Giấy phép](#license)
+5. [Cài đặt & Thiết lập](#installation--setup)
+6. [Chạy ứng dụng](#running-the-application)
+7. [Kiểm thử giao tiếp giữa các dịch vụ](#testing-inter-service-communication)
+8. [Cấu trúc dự án](#project-structure)
+9. [Hướng dẫn phát triển](#development-guide)
+10. [Xử lý sự cố](#troubleshooting)
+11. [Tài liệu](#documentation)
+12. [Thành viên nhóm](#team-members)
+13. [Giấy phép](#license)
 
 ---
 
@@ -143,3 +142,21 @@ Terraform: Công cụ chính được sử dụng để định nghĩa và khở
 
 - Nginx: Đóng vai trò Reverse Proxy đứng trước API Gateway để nhận request từ người dùng.
 - k6: Công cụ dùng để Load Testing (kiểm thử chịu tải) và đo lường hiệu năng hệ thống.
+
+---
+
+## 🚀 Cài đặt & Thiết lập
+
+## 1. Yêu cầu hệ thống
+
+- Docker & Docker Compose
+- Git
+
+## 2. Clone và set up
+
+```bash
+git clone <repository-url>
+cd "SE360 UIT-GO"
+```
+
+|_
