@@ -268,3 +268,19 @@ docker compose restart user-service
 ```bash
 docker compose up -d --build user-service
 ```
+
+---
+
+## 👥 Thành viên nhóm
+
+**Môn học**: SE360 – Cloud Computing and Modern Application Development  
+**Trường**: University of Information Technology (**UIT**)  
+**Lớp**: SE360.Q11  
+
+| Họ và tên         | MSSV | Công việc                                                                                           |
+| ------------------ | ---------- | ------------------------------------------------------------------------------------------------------------- |
+| Võ Thành Đạt        | 23520279   |                    |
+| Võ Hoàng Doanh         | 23520295   |           |
+| Nguyễn Đình Giang | 22520358   |  |
+| Đoàn Minh Tuấn | 22521600   |  |
+| Phạm Ngọc Thiên | 23521485   |  |
