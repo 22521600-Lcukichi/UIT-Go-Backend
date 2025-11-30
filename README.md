@@ -36,4 +36,14 @@ xế
 
 ## 🔑 Các tính năng chính
 
-1. 
+## 1. Quản lý người dùng (User Management) 
+
+- Service chịu trách nhiệm: User Service.
+
+- Ngôn ngữ/Framework: Django (Python).
+
+- Cơ sở dữ liệu: PostgreSQL (lưu trữ thông tin tài khoản, mật khẩu đã hash, hồ sơ người dùng).
+
+- Xác thực & Bảo mật:
+
+
