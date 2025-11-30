@@ -231,3 +231,40 @@ curl -X POST http://localhost:8001/api/auth/login/ \
     "password": "Test123456"
   }'
 ```
+
+---
+
+## 💻 Hướng dẫn phát triển
+
+### **Chạy migrations**
+```bash
+docker compose exec user-service python manage.py makemigrations
+docker compose exec user-service python manage.py migrate
+```
+
+### **Tạo superuser**
+```bash
+docker compose exec user-service python manage.py createsuperuser
+```
+
+### **Xem logs**
+```bash
+# Tất cả services
+docker compose logs -f
+
+# Chỉ user-service
+docker compose logs -f user-service
+
+# Chỉ database
+docker compose logs -f user-db
+```
+
+### **Restart service**
+```bash
+docker compose restart user-service
+```
+
+### **Rebuild sau khi thay đổi code**
+```bash
+docker compose up -d --build user-service
+```
