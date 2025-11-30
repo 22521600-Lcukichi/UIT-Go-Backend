@@ -159,4 +159,6 @@ git clone <repository-url>
 cd "SE360 UIT-GO"
 ```
 
-|_
+```text
+|-
+```
