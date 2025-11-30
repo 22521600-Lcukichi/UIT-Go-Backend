@@ -38,16 +38,23 @@ xế
 
 ## 1. Quản lý người dùng (User Management) 
 
-- Service chịu trách nhiệm: User Service.
+- Service: User Service.
 
-- Ngôn ngữ/Framework: Django (Python).
+- Framework: Django (Python).
 
-- Cơ sở dữ liệu: PostgreSQL (lưu trữ thông tin tài khoản, mật khẩu đã hash, hồ sơ người dùng).
+- Database: PostgreSQL (lưu trữ thông tin tài khoản, mật khẩu đã hash, hồ sơ người dùng).
 
 - Xác thực & Bảo mật:
 
    - AWS Cognito: Quản lý định danh (User Pool), chính sách mật khẩu và MFA (Multi-Factor Authentication) thay vì tự xây dựng hệ thống auth.
    - JWT (JSON Web Token): Dùng để xác thực phiên đăng nhập.
    - AWS Secrets Manager: Quản lý thông tin đăng nhập database (credentials) để bảo mật.
+ 
+## 2. Ghép nối chuyến đi (Ride matching)
+
+- Service: Driver Service, Trip Service
+- Framework: Node.js
+- Database: MongoDB được dùng để truy vấn và tính toán tìm tài xế gần nhất dựa trên tọa độ.
+- Công nghệ xử lý hàng đợi (Queue): AWS SQS hoặc Kafka được sử dụng để đẩy yêu cầu "find-driver" vào hàng đợi nhằm xử lý bất đồng bộ, giúp hệ thống chịu tải cao khi có nhiều người đặt xe cùng lúc.
 
 
