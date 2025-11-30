@@ -271,6 +271,10 @@ docker compose up -d --build user-service
 
 ---
 
+## 📁 Cấu trúc dự án
+
+---
+
 ## 👥 Thành viên nhóm
 
 **Môn học**: SE360 – Cloud Computing and Modern Application Development  
