@@ -96,3 +96,50 @@ xế
 └─────────────────┘
 ```
 
+---
+
+## 🛠 Công nghệ sử dụng
+
+## 1. Backend
+
+Hệ thống được chia thành các dịch vụ nhỏ với công nghệ phù hợp cho từng chức năng:
+
+  - Node.js: Được sử dụng cho Driver Service và Trip Service để xử lý các tác vụ IO-bound và thời gian thực.
+  - Python (Django Framework): Được sử dụng cho User Service để tận dụng khả năng quản lý xác thực và quản trị mạnh mẽ của Django.
+  - RESTful API: Giao thức giao tiếp chính giữa các microservices và client.
+
+## 2. Database & Caching
+
+Sử dụng chiến lược "Database per Service" (Mỗi dịch vụ một cơ sở dữ liệu riêng):
+
+  - PostgreSQL: Cơ sở dữ liệu quan hệ (SQL) dùng cho User Service (lưu user/session) và Trip Service (lưu thông tin chuyến đi, hóa đơn).
+  - MongoDB: Cơ sở dữ liệu phi quan hệ (NoSQL) dùng cho Driver Service và một phần Trip Service để lưu trữ dữ liệu vị trí địa lý (GeoJSON) và lịch sử di chuyển.
+  - Redis (ElastiCache): Dùng để caching (lưu đệm) dữ liệu truy cập thường xuyên và lưu vị trí tài xế theo thời gian thực để giảm tải cho DB chính.
+
+## 3. Containerization & Orchestration
+
+- Docker: Đóng gói ứng dụng thành các container image.
+- Docker Compose: Dùng để triển khai và chạy thử nghiệm hệ thống trên môi trường local.
+- AWS ECS (Elastic Container Service) với Fargate: Nền tảng quản lý container serverless được sử dụng để chạy các dịch vụ trên môi trường AWS.
+
+## 4. Hạ tầng đám mây
+
+Hệ thống được triển khai hoàn toàn trên Amazon Web Services (AWS):
+
+   - Compute: AWS Fargate (chạy container không cần quản lý server) và EC2 (cho môi trường thử nghiệm).
+   - Networking: VPC (Virtual Private Cloud), NAT Gateway, Internet Gateway, và Application Load Balancer (ALB) để định tuyến traffic.
+   - Storage: S3 (dùng để lưu trữ backup hoặc static files - được nhắc đến trong giải pháp backup).
+   - Message Queue: AWS SQS (Simple Queue Service) dùng để xử lý bất đồng bộ (async) cho các tác vụ như tìm tài xế.
+   - Security & Identity:
+        - AWS Cognito: Quản lý định danh người dùng (User Pool).
+        - AWS KMS (Key Management Service): Quản lý khóa mã hóa dữ liệu.
+        - AWS Secrets Manager: Quản lý các thông tin nhạy cảm (DB credentials).
+
+## 5. Infrastructure as Code (IaC)
+
+Terraform: Công cụ chính được sử dụng để định nghĩa và khởi tạo toàn bộ hạ tầng AWS (VPC, Subnets, ECS, RDS...) thông qua mã nguồn, đảm bảo tính nhất quán.
+
+## 6. Các công cụ khác
+
+- Nginx: Đóng vai trò Reverse Proxy đứng trước API Gateway để nhận request từ người dùng.
+- k6: Công cụ dùng để Load Testing (kiểm thử chịu tải) và đo lường hiệu năng hệ thống.
