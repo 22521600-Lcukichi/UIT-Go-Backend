@@ -16,12 +16,9 @@ triển khai và kiểm thử các thành phần microservices trong kiến trú
 4. [Công nghệ sử dụng](#technology-stack)
 5. [Cài đặt & Thiết lập](#installation--setup)
 6. [Kiểm thử giao tiếp giữa các dịch vụ](#testing-inter-service-communication)
-8. [Cấu trúc dự án](#project-structure)
-9. [Hướng dẫn phát triển](#development-guide)
-10. [Xử lý sự cố](#troubleshooting)
-11. [Tài liệu](#documentation)
-12. [Thành viên nhóm](#team-members)
-13. [Giấy phép](#license)
+7. [Cấu trúc dự án](#project-structure)
+8. [Hướng dẫn phát triển](#development-guide)
+9. [Thành viên nhóm](#team-members)
 
 ---
 
