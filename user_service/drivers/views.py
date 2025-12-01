@@ -1,4 +1,6 @@
 from django.shortcuts import render
+from django.conf import settings
+import requests
 
 # Create your views here.
 
@@ -192,6 +194,7 @@ def update_driver_status(request):
         #Thông báo đến DriverService
         try:
             driver_service_url = getattr(settings, 'DRIVER_SERVICE_URL', None)
+            internal_service_token = getattr(settings, 'INTERNAL_SERVICE_TOKEN', None)
             #Nếu DriverService có URL và tài xế đang online, gửi thông báo đến DriverService
             if driver_service_url and is_online:
                 response = requests.put(
@@ -202,7 +205,7 @@ def update_driver_status(request):
                         'latitude': float(latitude) if latitude else None,
                         'longitude': float(longitude) if longitude else None
                     },
-                    headers={'X-Service-Token': getattr(settings, 'INTERNAL_SERVICE_TOKEN', None)},
+                    headers={'X-Internal-Service-Token': internal_service_token} if internal_service_token else {},
                     timeout=5
                 )
                 response.raise_for_status() #Nếu có lỗi, sẽ ném ra lỗi
@@ -214,7 +217,7 @@ def update_driver_status(request):
                     json={
                         'is_online': False
                     },
-                    headers={'X-Service-Token': getattr(settings, 'INTERNAL_SERVICE_TOKEN', None)}, #Token nội bộ để xác thực giữa các service
+                    headers={'X-Internal-Service-Token': internal_service_token} if internal_service_token else {},
                     timeout=5
                 )
                 response.raise_for_status() #Nếu có lỗi, sẽ ném ra lỗi
@@ -247,14 +250,14 @@ def update_driver_stats(request, driver_id):
     Cập nhật thống kê của tài xế
     """
     
-    #Xác thực token nội bộ
-    service_token = request.headers.get('X-Service-Token')
+    #Xác thực internal service token
+    service_token = request.headers.get('X-Internal-Service-Token') or request.headers.get('X-Service-Token')
     if service_token != getattr(settings, 'INTERNAL_SERVICE_TOKEN', None):
         return Response({
             'success': False,
             'error': {
                 'code': 'FORBIDDEN',
-                'message': 'Token nội bộ không hợp lệ'
+                'message': 'Internal service token không hợp lệ'
             }
         }, status=status.HTTP_403_FORBIDDEN)
     try:

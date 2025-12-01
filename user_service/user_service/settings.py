@@ -23,14 +23,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# Sử dụng os.getenv() như fallback để tránh deadlock với python-decouple trong Docker
-SECRET_KEY = os.getenv('SECRET_KEY') or config('SECRET_KEY', default='django-insecure-dev-key-change-in-production')
+# Chỉ dùng os.getenv() để tránh deadlock với python-decouple trong Docker
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-key-change-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 # Đơn giản hóa ALLOWED_HOSTS để tránh deadlock
-allowed_hosts_str = os.getenv('ALLOWED_HOSTS') or config('ALLOWED_HOSTS', default='*')
+allowed_hosts_str = os.getenv('ALLOWED_HOSTS', '*')
 if allowed_hosts_str == '*':
     ALLOWED_HOSTS = ['*']
 else:
@@ -53,8 +53,12 @@ REST_FRAMEWORK = {
     ],
     
 }
-# Internal Service Token - Không cần nữa vì chỉ có 1 service
-# INTERNAL_SERVICE_TOKEN = os.getenv('INTERNAL_SERVICE_TOKEN') or config('INTERNAL_SERVICE_TOKEN', default='your-internal-service-token-here')
+# Internal Service Token - Dùng để xác thực giữa các service
+INTERNAL_SERVICE_TOKEN = os.getenv('INTERNAL_SERVICE_TOKEN', 'uit-go-internal-service-token-change-in-production')
+
+# Service URLs
+DRIVER_SERVICE_URL = os.getenv('DRIVER_SERVICE_URL', 'http://driver-service:3003')
+TRIP_SERVICE_URL = os.getenv('TRIP_SERVICE_URL', 'http://trip-service:3004')
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
@@ -63,7 +67,7 @@ SIMPLE_JWT = {
     'UPDATE_LAST_LOGIN': True,
     
     'ALGORITHM': 'HS256',
-    'SIGNING_KEY': os.getenv('JWT_SECRET') or config('JWT_SECRET', default='your-secret-key-change-in-production'),
+    'SIGNING_KEY': os.getenv('JWT_SECRET', 'your-secret-key-change-in-production'),
     'VERIFYING_KEY': None,
     
     'AUTH_HEADER_TYPES': ('Bearer',),
@@ -126,11 +130,11 @@ WSGI_APPLICATION = 'user_service.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',  # Sử dụng PostgreSQL thay SQLite
-        'NAME': os.getenv('DB_NAME') or config('DB_NAME', default='user_service'),      # Tên database
-        'USER': os.getenv('DB_USER') or config('DB_USER', default='postgres'),          # Username PostgreSQL
-        'PASSWORD': os.getenv('DB_PASSWORD') or config('DB_PASSWORD', default='postgres123'), # Password
-        'HOST': os.getenv('DB_HOST') or config('DB_HOST', default='localhost'),         # Host (localhost hoặc container name)
-        'PORT': os.getenv('DB_PORT') or config('DB_PORT', default='5432'),              # Port PostgreSQL
+        'NAME': os.getenv('DB_NAME', 'user_service'),      # Tên database
+        'USER': os.getenv('DB_USER', 'postgres'),          # Username PostgreSQL
+        'PASSWORD': os.getenv('DB_PASSWORD', 'postgres123'), # Password
+        'HOST': os.getenv('DB_HOST', 'user-db'),         # Host (user-db trong Docker, localhost khi chạy local)
+        'PORT': os.getenv('DB_PORT', '5432'),              # Port PostgreSQL
         'OPTIONS': {
             'connect_timeout': 10,  # Timeout kết nối 10 giây
         },

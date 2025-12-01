@@ -20,6 +20,5 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('authentication.urls')),
-    path('api/drivers/', include('drivers.urls')), 
-    path('api/admin/', include(('authentication.admin_urls', 'admin_api'), namespace='admin_api')),  # Admin API với namespace riêng
+    path('api/drivers/', include('drivers.urls')),
 ]

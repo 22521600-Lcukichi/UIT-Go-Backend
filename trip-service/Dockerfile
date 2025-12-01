@@ -25,8 +25,11 @@ WORKDIR /usr/src/app
 
 # Chỉ copy node_modules + source cần thiết
 COPY --from=builder /usr/src/app/node_modules ./node_modules
+COPY --from=builder /usr/src/app/package.json ./
 COPY --from=builder /usr/src/app/*.js ./
-
+COPY --from=builder /usr/src/app/config ./config
+COPY --from=builder /usr/src/app/model ./model
+COPY --from=builder /usr/src/app/utils ./utils
 
 EXPOSE 3004
 

@@ -7,7 +7,9 @@ const Driver = require('./model/Driver_model.js');
 const axios = require("axios");
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
-const TRIP_SERVICE_URL   = process.env.TRIP_SERVICE_URL   || 'http://localhost:3004';
+const TRIP_SERVICE_URL = process.env.TRIP_SERVICE_URL || 'http://localhost:3004';
+const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://user-service:8001';
+const INTERNAL_SERVICE_TOKEN = process.env.INTERNAL_SERVICE_TOKEN || 'uit-go-internal-service-token-change-in-production';
 
 /**
  * Hàm tính khoảng cách (Haversine Formula)
@@ -110,12 +112,47 @@ router.post('/find-driver', async (req, res) => {
         const fare_estimate = calculateFare(distance_km);
 
         // ============================
+        // 👉 GỌI USER-SERVICE ĐỂ LẤY THÔNG TIN CHI TIẾT DRIVER
+        // ============================
+        let driverProfile = null;
+        try {
+            const userServiceResp = await axios.get(
+                `${USER_SERVICE_URL}/api/drivers/${driver.driver_id}/profile/`,
+                {
+                    headers: {
+                        'X-Internal-Service-Token': INTERNAL_SERVICE_TOKEN
+                    },
+                    timeout: 5000
+                }
+            );
+            driverProfile = userServiceResp.data.data?.driver_profile;
+        } catch (error) {
+            console.warn("⚠️ User-service unavailable, returning location only:", error.message);
+        }
+
+        // ============================
         // 👉 TRẢ VỀ KẾT QUẢ CHO FE
         // ============================
         return res.status(200).json({
             success: true,
             message: "Driver found successfully",
-            driver,
+            driver: {
+                driver_id: driver.driver_id,
+                location: driver.location,
+                district: driver.district,
+                city: driver.city,
+                // Thông tin từ user-service (nếu có)
+                ...(driverProfile && {
+                    full_name: driverProfile.user?.full_name,
+                    phone: driverProfile.user?.phone,
+                    vehicle_type: driverProfile.vehicle_type,
+                    vehicle_brand: driverProfile.vehicle_brand,
+                    vehicle_model: driverProfile.vehicle_model,
+                    license_plate: driverProfile.license_plate,
+                    approval_status: driverProfile.approval_status,
+                    is_online: driverProfile.is_online
+                })
+            },
             distance_km: parseFloat(distance_km.toFixed(2)),
             fare_estimate
         });

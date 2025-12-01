@@ -7,6 +7,7 @@ const path = require('path');
 const GetDriver = require('./GetDriver.js');
 const FindDriver = require('./FindDriver.js');
 const SendLocation = require('./SendLocation.js');
+const UpdateDriverStatus = require('./UpdateDriverStatus.js');
 const connectDB = require('./config/db.js');
 // Load biến môi trường
 dotenv.config({ path: path.resolve(__dirname, '.env') });
@@ -25,7 +26,18 @@ app.use(express.json());
 app.use(GetDriver);
 app.use(FindDriver);
 app.use(SendLocation);
-const PORT = 3003;
-app.listen(PORT, () => {
+app.use(UpdateDriverStatus);
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    service: 'driver-service',
+    timestamp: new Date().toISOString()
+  });
+});
+
+const PORT = process.env.PORT || 3003;
+app.listen(PORT, '0.0.0.0', () => {
   console.log('Driver service is running on port', PORT);
 });

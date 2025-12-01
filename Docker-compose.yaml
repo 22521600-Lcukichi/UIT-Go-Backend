@@ -1,0 +1,180 @@
+version: "3.9"
+
+services:
+  # ==========================================================
+  # API Gateway
+  # ==========================================================
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    environment:
+      - PORT=3000
+      - USER_SERVICE_URL=${USER_SERVICE_URL:-http://user-service:8001}
+      - DRIVER_SERVICE_URL=${DRIVER_SERVICE_URL:-http://driver-service:3003}
+      - TRIP_SERVICE_URL=${TRIP_SERVICE_URL:-http://trip-service:3004}
+      - JWT_SECRET=${JWT_SECRET:-your-jwt-secret-key-change-in-production}
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:-uit-go-internal-service-token-change-in-production}
+    ports:
+      - "3000:3000"
+    networks:
+      - uit-go-network
+    depends_on:
+      - user-service
+    restart: unless-stopped
+
+  # ==========================================================
+  # Trip Service
+  # ==========================================================
+  trip-service:
+    build:
+      context: ./trip-service
+      dockerfile: Dockerfile
+    container_name: trip-service
+    environment:
+      - PORT=3004
+      - USER_SERVICE_URL=${USER_SERVICE_URL:-http://user-service:8001}
+      - DRIVER_SERVICE_URL=${DRIVER_SERVICE_URL:-http://driver-service:3003}
+      - TRIP_SERVICE_URL=${TRIP_SERVICE_URL:-http://trip-service:3004}
+      - URL_MONGODB_SERVER=${URL_MONGODB_SERVER:-mongodb://mongodb:27017}
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:-uit-go-internal-service-token-change-in-production}
+    ports:
+      - "3004:3004"
+    networks:
+      - uit-go-network
+    depends_on:
+      - mongodb
+      - user-service
+    restart: unless-stopped
+
+  # ==========================================================
+  # Driver Service
+  # ==========================================================
+  driver-service:
+    build:
+      context: ./driver-service
+      dockerfile: Dockerfile
+    container_name: driver-service
+    environment:
+      - PORT=3003
+      - USER_SERVICE_URL=${USER_SERVICE_URL:-http://user-service:8001}
+      - DRIVER_SERVICE_URL=${DRIVER_SERVICE_URL:-http://driver-service:3003}
+      - TRIP_SERVICE_URL=${TRIP_SERVICE_URL:-http://trip-service:3004}
+      - URL_MONGODB_SERVER=${URL_MONGODB_SERVER:-mongodb://mongodb:27017}
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:-uit-go-internal-service-token-change-in-production}
+    ports:
+      - "3003:3003"
+    networks:
+      - uit-go-network
+    depends_on:
+      - mongodb
+      - user-service
+    restart: unless-stopped
+
+  # ==========================================================
+  # User Service (Django)
+  # ==========================================================
+  user-service:
+    build:
+      context: ./user_service
+      dockerfile: Dockerfile
+    container_name: uit-go-user-service
+    environment:
+      - DB_NAME=${USER_DB_NAME:-user_service}
+      - DB_USER=${USER_DB_USER:-postgres}
+      - DB_PASSWORD=${USER_DB_PASSWORD:-postgres123}
+      - DB_HOST=user-db
+      - DB_PORT=5432
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-dev-key-change-in-production}
+      - JWT_SECRET=${JWT_SECRET:-your-jwt-secret-key-change-in-production}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-*}
+      - DRIVER_SERVICE_URL=${DRIVER_SERVICE_URL:-http://driver-service:3003}
+      - TRIP_SERVICE_URL=${TRIP_SERVICE_URL:-http://trip-service:3004}
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:-uit-go-internal-service-token-change-in-production}
+    ports:
+      - "8001:8001"
+    depends_on:
+      user-db:
+        condition: service_healthy
+    networks:
+      - uit-go-network
+    volumes:
+      - ./user_service:/app
+    command: python manage.py runserver 0.0.0.0:8001
+    restart: unless-stopped
+
+  # ==========================================================
+  # PostgreSQL Database cho User Service
+  # ==========================================================
+  user-db:
+    image: postgres:15-alpine
+    container_name: uit-go-user-db
+    environment:
+      POSTGRES_DB: ${USER_DB_NAME:-user_service}
+      POSTGRES_USER: ${USER_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${USER_DB_PASSWORD:-postgres123}
+    ports:
+      - "5432:5432"
+    networks:
+      - uit-go-network
+    volumes:
+      - user-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${USER_DB_USER:-postgres} -d ${USER_DB_NAME:-user_service}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ==========================================================
+  # pgAdmin 4
+  # ==========================================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: uit-go-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@uitgo.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
+      PGADMIN_CONFIG_SERVER_MODE: 'True'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    ports:
+      - "5050:80"
+    networks:
+      - uit-go-network
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      user-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ==========================================================
+  # MongoDB — bạn chưa đưa cấu hình nên để placeholder
+  # ==========================================================
+  mongodb:
+    image: mongo:latest
+    container_name: uit-go-mongodb
+    ports:
+      - "27017:27017"
+    networks:
+      - uit-go-network
+    volumes:
+      - mongo-data:/data/db
+    restart: unless-stopped
+
+
+# ==========================================================
+# Volumes
+# ==========================================================
+volumes:
+  user-db-data:
+  pgadmin-data:
+  mongo-data:
+
+# ==========================================================
+# Networks
+# ==========================================================
+networks:
+  uit-go-network:
+    driver: bridge

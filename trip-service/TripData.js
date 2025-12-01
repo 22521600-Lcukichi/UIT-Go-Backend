@@ -3,6 +3,7 @@ const router = express.Router();
 const path = require('path');
 const dotenv = require('dotenv');
 const Trip = require('./model/Trip_model.js');
+const { validateCustomerId, validateDriverId } = require('./utils/validation.js');
 
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
@@ -29,7 +30,23 @@ router.post("/add_trip_data", async (req, res) => {
         !destination_city || !destination_district || !status_trip) 
     {
       return res.status(400).json({
-        error: 'Missing required fields'
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Missing required fields'
+        }
+      });
+    }
+
+    // Validate customer_id với user-service
+    const isValidCustomer = await validateCustomerId(customer_id);
+    if (!isValidCustomer) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'INVALID_CUSTOMER',
+          message: 'Customer ID không tồn tại trong hệ thống'
+        }
       });
     }
 
@@ -53,7 +70,13 @@ router.post("/add_trip_data", async (req, res) => {
 
   } catch (err) {
     console.error('❌ Error in /add_trip_data:', err);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Internal server error'
+      }
+    });
   }
 });
 
@@ -69,7 +92,11 @@ router.patch("/cancel_trip", async (req, res) => {
 
     if (!trip_id) {
       return res.status(400).json({
-        error: 'Missing required fields (trip_id)'
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Missing required fields (trip_id)'
+        }
       });
     }
 
@@ -91,7 +118,13 @@ router.patch("/cancel_trip", async (req, res) => {
 
   } catch (err) {
     console.error('❌ Error in /cancel_trip:', err);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Internal server error'
+      }
+    });
   }
 });
 
@@ -108,7 +141,23 @@ router.patch("/update_driver", async (req, res) => {
 
     if (!trip_id || !driver_id) {
       return res.status(400).json({
-        error: 'Missing required fields (trip_id, driver_id)'
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Missing required fields (trip_id, driver_id)'
+        }
+      });
+    }
+
+    // Validate driver_id với user-service
+    const isValidDriver = await validateDriverId(driver_id);
+    if (!isValidDriver) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'INVALID_DRIVER',
+          message: 'Driver ID không tồn tại trong hệ thống'
+        }
       });
     }
 
@@ -133,7 +182,13 @@ router.patch("/update_driver", async (req, res) => {
 
   } catch (err) {
     console.error('❌ Error in /update_driver:', err);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Internal server error'
+      }
+    });
   }
 });
 
@@ -149,7 +204,11 @@ router.post("/getTripData", async (req, res) => {
 
     if (!driver_id) {
       return res.status(400).json({
-        error: 'Missing required field (driver_id)'
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Missing required field (driver_id)'
+        }
       });
     }
 
@@ -159,7 +218,13 @@ router.post("/getTripData", async (req, res) => {
     });
 
     if (!trip) {
-      return res.status(404).json({ error: 'No matched trip found for this driver' });
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'NOT_FOUND',
+          message: 'No matched trip found for this driver'
+        }
+      });
     }
 
     return res.status(200).json({
@@ -175,7 +240,13 @@ router.post("/getTripData", async (req, res) => {
 
   } catch (err) {
     console.error('❌ Error in /getTripData:', err);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Internal server error'
+      }
+    });
   }
 });
 
@@ -186,7 +257,15 @@ router.post("/getTripData", async (req, res) => {
 router.patch("/assign-driver", async (req, res) => {
   try {
     const { trip_id, driver_id } = req.body;
-    if (!trip_id || !driver_id) return res.status(400).json({ error: 'Missing required fields' });
+    if (!trip_id || !driver_id) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Missing required fields'
+        }
+      });
+    }
 
     const updatedTrip = await Trip.findOneAndUpdate(
       { _id: trip_id },
@@ -194,7 +273,15 @@ router.patch("/assign-driver", async (req, res) => {
       { new: true }
     );
 
-    if (!updatedTrip) return res.status(404).json({ error: 'Trip not found' });
+    if (!updatedTrip) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'NOT_FOUND',
+          message: 'Trip not found'
+        }
+      });
+    }
 
     return res.status(200).json({
       success: true,
@@ -204,7 +291,13 @@ router.patch("/assign-driver", async (req, res) => {
 
   } catch (err) {
     console.error('❌ Error in /assign-driver:', err);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Internal server error'
+      }
+    });
   }
 });
 
@@ -214,7 +307,13 @@ router.get("/trips/driver", async (req, res) => {
     const { driver_id, trip_id } = req.query;
 
     if (!driver_id || !trip_id) {
-      return res.status(400).json({ error: 'Missing required fields' });
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Missing required fields'
+        }
+      });
     }
 
    
@@ -224,7 +323,13 @@ router.get("/trips/driver", async (req, res) => {
     });
 
     if (!confirmedTrip) {
-      return res.status(404).json({ error: 'Trip not found or not accepted yet' });
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'NOT_FOUND',
+          message: 'Trip not found or not accepted yet'
+        }
+      });
     }
 
     // Chỉ trả về status_trip
@@ -235,7 +340,13 @@ router.get("/trips/driver", async (req, res) => {
 
   } catch (err) {
     console.error('❌ Error in /trips/driver:', err);
-    return res.status(500).json({ error: 'Internal server error', details: err.message });
+    return res.status(500).json({
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Internal server error'
+      }
+    });
   }
 });
 
@@ -245,7 +356,13 @@ router.patch("/update/completeTrip", async (req, res) => {
         const { trip_id, bill } = req.body;
 
         if (!trip_id || !bill) {
-            return res.status(400).json({ error: "Missing trip_id or bill" });
+            return res.status(400).json({
+                success: false,
+                error: {
+                    code: 'VALIDATION_ERROR',
+                    message: 'Missing trip_id or bill'
+                }
+            });
         }
 
         const updatedTrip = await Trip.findByIdAndUpdate(
@@ -258,7 +375,13 @@ router.patch("/update/completeTrip", async (req, res) => {
         );
 
         if (!updatedTrip) {
-            return res.status(404).json({ error: "Trip not found" });
+            return res.status(404).json({
+                success: false,
+                error: {
+                    code: 'NOT_FOUND',
+                    message: 'Trip not found'
+                }
+            });
         }
 
         return res.status(200).json({
@@ -269,7 +392,13 @@ router.patch("/update/completeTrip", async (req, res) => {
 
     } catch (err) {
         console.error("❌ Error in TripService /completeTrip:", err);
-        return res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({
+            success: false,
+            error: {
+                code: 'INTERNAL_ERROR',
+                message: 'Internal server error'
+            }
+        });
     }
 });
 

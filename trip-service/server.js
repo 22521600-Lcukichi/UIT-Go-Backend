@@ -22,7 +22,17 @@ app.use(express.json());
 // Gắn router con
 app.use(PostDataTrip);
 
-const PORT = 3004;
-app.listen(PORT, () => {
-  console.log('Driver service is running on port', PORT);
+const PORT = process.env.PORT || 3004;
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    service: 'trip-service',
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log('Trip service is running on port', PORT);
 });
