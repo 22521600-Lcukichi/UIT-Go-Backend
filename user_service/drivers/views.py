@@ -109,7 +109,7 @@ def get_driver_profile_by_id(request, driver_id):
     Lấy thông tin tài xế bằng ID
     """
     try:
-        driver_profile = DriverProfile.objects.select_related('user').get(id=driver_id)
+        driver_profile = DriverProfile.objects.select_related('user').get(user_id=driver_id)
         serializer = DriverProfileSerializer(driver_profile)
         return Response({
             'success': True,
@@ -227,12 +227,12 @@ def update_driver_status(request):
         return Response({
             'success': True,
             'data': {
-                'driver_id': str(driver_profile.id),
+                'driver_id': str(user.id),
                 'is_online': is_online,
                 'vehicle_type': driver_profile.vehicle_type,
                 'updated_at': timezone.now().isoformat()
             },
-            'message': f"Cập nhật trạng thái online của tài xế {driver_profile.id} thành công"
+            'message': f"Cập nhật trạng thái online của tài xế {user.id} thành công"
         }, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({
@@ -261,7 +261,7 @@ def update_driver_stats(request, driver_id):
             }
         }, status=status.HTTP_403_FORBIDDEN)
     try:
-        driver_profile = DriverProfile.objects.select_related('user').get(id=driver_id)
+        driver_profile = DriverProfile.objects.select_related('user').get(user_id=driver_id)
     except DriverProfile.DoesNotExist:
         return Response({
             'success': False,
