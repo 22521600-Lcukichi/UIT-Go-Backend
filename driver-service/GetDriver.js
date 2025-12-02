@@ -6,6 +6,8 @@ const Driver = require(path.join(__dirname, 'model', 'Driver_model.js'));
 
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
+
+
 // ------------------------------------------------------------
 // POST /charge
 // Lưu hoặc cập nhật vị trí tài xế bằng GeoJSON + 2dsphere index
