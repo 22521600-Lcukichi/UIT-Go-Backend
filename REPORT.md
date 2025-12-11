@@ -36,7 +36,7 @@ Hệ thống sử dụng mô hình **3-Tier** (Web, App, Data) bên trong một 
 
 # 2. Phân tích Module chuyên sâu
 
-# MODULE A: Scalability & Performance
+### MODULE A: Scalability & Performance
 
 # A. Kiến trúc Microservices & Phân tầng (3-Tier)
 
@@ -97,6 +97,15 @@ Nhóm đã sử dụng công cụ k6 để kiểm thử chịu tải với các 
 | **Compression + HTTP/2** | Giảm băng thông (bandwidth) và TTFB (Time To First Byte), cải thiện độ trễ. |Tăng nhẹ mức sử dụng CPU để nén/giải nén; cần kiểm thử tính tương thích với phía Client. |
 | **Async hóa luồng phụ (enqueue)** | Bảo vệ các service lõi, giúp hệ thống chịu tải tốt hơn. | Người dùng có thể cảm thấy phản hồi chậm hơn; cần thiết kế UX và thông báo trạng thái rõ ràng để người dùng biết. |
 | **TTL ngắn vs dài cho cache** | **TTL dài:** Tỷ lệ cache hit cao, giảm tải DB tối đa. | **TTL dài:** Dữ liệu dễ bị cũ (stale).  **TTL ngắn:** Cache miss nhiều, hiệu quả giảm tải thấp hơn.  |
+
+--- 
+### MODULE C: Thiết kế cho Security (DevSecOps)
+
+## A. Nguyên tắc thiết kế cốt lõi
+* **Zero Trust Architecture (ZTA)**: Loại bỏ niềm tin ngầm định (implicit trust). Giả định rằng mạng nội bộ đã bị xâm nhập, do đó mọi luồng traffic (kể cả giữa các microservices) đều phải được xác thực và cấp quyền tối thiểu.
+* **Defense-in-Depth (Phòng thủ chiều sâu)**: Thiết lập nhiều lớp bảo vệ chồng lên nhau (Network, Application, Data). Nếu một lớp bị phá vỡ, các lớp khác vẫn bảo vệ được hệ thống.
+* **Least Privilege (Đặc quyền tối thiểu)**: Mỗi thành phần (User, Service, Role) chỉ được cấp quyền vừa đủ để thực hiện chức năng, không hơn.
+
 
 
 
