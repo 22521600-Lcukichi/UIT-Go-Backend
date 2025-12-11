@@ -67,6 +67,23 @@ Nhóm áp dụng mô hình Cache-aside để giảm tải cho Database:
 # E. Autoscaling (Tự động mở rộng)
 * **ECS Scaling**: Cấu hình Target Tracking dựa trên mức sử dụng CPU. Khi CPU vượt quá 60%, hệ thống tự động tăng số lượng Task (Container).
 
+## Sơ đồ Luồng dữ liệu "Tìm tài xế" (Async Booking Flow)
+
+![Sơ đồ Luồng dữ liệu "Tìm tài xế" (Async Booking Flow)](https://github.com/22521600-Lcukichi/UIT-Go-Backend/blob/main/Async%20Booking%20Flow.png)
+
+## Sơ đồ App Routing & Database Scaling
+
+![Sơ đồ App Routing & Database Scaling](https://github.com/22521600-Lcukichi/UIT-Go-Backend/blob/main/app%20routing.png)
+
+##
+
+| Chỉ số | Baseline (Trước tối ưu) | Optimized (Sau tối ưu) | Cải thiện |
+| :--- | :--- | :--- | :--- |
+| **Throughput (RPS)** | 300 RPS | **600 RPS** | ⬆️ Tăng gấp đôi |
+| **Độ trễ (Latency p95)** | ~350ms | **~180ms** | ⬇️ Giảm ~48% |
+| **Tỷ lệ lỗi (Error Rate)**| 3% | **< 1%** | ✅ Ổn định hơn |
+
+
 
 
 
