@@ -26,4 +26,26 @@ Module này tập trung giải quyết vấn đề chịu tải cao (High Concur
 
 ![Sơ đồ Luồng dữ liệu "Tìm tài xế" (Async Booking Flow)](https://github.com/22521600-Lcukichi/UIT-Go-Backend/blob/main/Async%20Booking%20Flow.png)
 
+## Sơ đồ App Routing & Database Scaling
+
+graph LR
+    Traffic[User Traffic] --> ALB[Load Balancer]
+    
+    subgraph Routing_Strategy
+        ALB -- "POST / PUT / DELETE" --> Write_Group[Write Endpoints]
+        ALB -- "GET (Read Heavy)" --> Read_Group[Read Endpoints]
+    end
+    
+    subgraph Database_Layer
+        Write_Group -->|Write| Primary[(RDS Primary)]
+        Read_Group -->|Read| Replica[(RDS Read Replica)]
+        Primary -.->|Async Replication| Replica
+    end
+
+    subgraph Auto_Scaling
+        CW[CloudWatch Metrics] -->|Trigger CPU > 60%| ECS_ASG[ECS Auto Scaling]
+        ECS_ASG -->|Scale Out| Write_Group
+        ECS_ASG -->|Scale Out| Read_Group
+    end
+
 
