@@ -163,6 +163,58 @@ Nhóm thực hiện đã sử dụng phương pháp STRIDE kết hợp với Dat
 | **004** | **Quản lý định danh với AWS Cognito** | **Quyết định:** Sử dụng AWS Cognito User Pool thay vì tự xây dựng module Auth.<br><br>**Lý do:**<br> - **An toàn & Tốc độ:** Tránh lỗ hổng bảo mật tự code, giảm thời gian development.<br> - **Tính năng:** Có sẵn phát hiện đăng nhập đáng ngờ và tuân thủ Compliance. | - **Vendor Lock-in:** Phụ thuộc hoàn toàn vào hệ sinh thái AWS.<br>- **Chi phí:** Chi phí tăng tuyến tính theo số lượng người dùng hoạt động (MAU). |
 | **005** | **Caching & Read Replicas (Scalability)** | **Quyết định:** Dùng Redis Cache (TTL ngắn) và RDS Read Replicas.<br><br>**Lý do:**<br> - **Hiệu năng:** Giảm tải cho Primary DB, giảm p95 latency cho API tìm tài xế.<br> - **Tách biệt:** Tách luồng Đọc (Read) và Ghi (Write) để tối ưu throughput. | - **Tính nhất quán (Consistency):** Chấp nhận Eventual Consistency, dữ liệu đọc từ Replica có thể bị trễ (lag).<br>- **Dữ liệu cũ:** Cache có thể trả về vị trí cũ nếu TTL chưa hết hạn. |
 
+# 4. Thách thức & Bài học kinh nghiệm (Challenges & Lessons Learned)
+
+### Module C: Security (Bảo mật)
+* **Thách thức về Infrastructure as Code (IaC):**
+    * *Vấn đề:* Khó khăn khi tách code Terraform của Module C riêng biệt nhưng cần tham chiếu đến tài nguyên (VPC, Subnets) của Module nền tảng (Base).
+    * *Bài học:* Sử dụng `data source` của Terraform để truy vấn tài nguyên qua Tags. Bài học rút ra là cần có **Chiến lược gắn thẻ (Tagging Strategy)** nhất quán ngay từ đầu để dễ dàng quản lý và tham chiếu.
+* **Thách thức về Network ACLs (NACLs):**
+    * *Vấn đề:* NACLs là stateless (phi trạng thái). Nếu cho phép traffic đi ra (outbound) port 443, bắt buộc phải mở dải port 1024-65535 cho traffic trả về (inbound), gây lo ngại rủi ro bảo mật.
+    * *Bài học:* Hiểu sâu về **TCP/IP Handshake** là bắt buộc. Giải pháp là chấp nhận mở ephemeral ports nhưng phải kết hợp chặn chặt chẽ bằng Security Groups (Stateful firewall - tường lửa có trạng thái).
+
+### Module A: Scalability & Performance (Hiệu năng)
+* **Backpressure & Idempotency:**
+    * *Vấn đề:* Sử dụng Queue giúp chịu tải burst nhưng gây ra vấn đề trùng lặp tin nhắn (duplicate message).
+    * *Bài học:* Luôn thiết kế theo nguyên tắc "At least once delivery" (Gửi ít nhất một lần). Bắt buộc phải có **idempotency-key** và **Dead Letter Queue (DLQ)** để xử lý lỗi và tránh trùng lặp đơn hàng.
+* **Consistency vs Latency:**
+    * *Vấn đề:* Đọc từ Replica hoặc Cache giúp giảm độ trễ (latency) nhưng gặp vấn đề dữ liệu không đồng nhất tức thì (Eventual Consistency).
+    * *Bài học:* Cần phân loại rõ endpoint nào cần **Strong Consistency** (đọc trực tiếp từ Primary DB) và endpoint nào chấp nhận độ trễ dữ liệu để tối ưu trải nghiệm người dùng.
+* **Cache Invalidation:**
+    * *Vấn đề:* TTL quá dài thì dữ liệu vị trí bị cũ (stale), TTL quá ngắn thì cache miss nhiều, giảm hiệu quả.
+    * *Bài học:* Chọn TTL ngắn (20-60s) cho dữ liệu vị trí và hỗ trợ cơ chế **refresh thủ công** khi trạng thái thay đổi lớn (ví dụ: kết thúc chuyến đi).
+* **Autoscaling Tuning:**
+    * *Vấn đề:* Ngưỡng CPU/RPS thiết lập không chuẩn gây hiện tượng scale "ping-pong" (tăng giảm số lượng task liên tục).
+    * *Bài học:* Cần thiết lập `min/max tasks` hợp lý và có thời gian warm-up cho service.
+* **Quan trắc (Observability):**
+    * *Vấn đề:* Thiếu số liệu thực tế dẫn đến việc tối ưu sai chỗ.
+    * *Bài học:* Cần chạy load test (sử dụng k6/JMeter) sớm với kịch bản sát thực tế và đo lường các chỉ số p95/error rate thay vì chỉ nhìn vào số liệu trung bình.
+
+---
+
+# 5. Kết quả & Hướng phát triển (Results & Future Improvements)
+
+### Tóm tắt Kết quả (Results)
+* **Về Bảo mật (Module C):**
+    * Hoàn thành **Threat Modeling** (phương pháp STRIDE) để nhận diện sớm các rủi ro.
+    * Xây dựng mạng lưới tin cậy (**Zero Trust Architecture**) với sự kết hợp chặt chẽ giữa NACLs và Security Groups.
+    * Thiết lập vành đai bảo vệ định danh (AWS Cognito) và mã hóa dữ liệu (KMS, Secrets Manager).
+* **Về Hiệu năng (Module A):**
+    * Kiến trúc chịu tải tốt hơn nhờ **Async Queue** chống nghẽn cho DriverService.
+    * Giảm đáng kể độ trễ (p95 latency) ở luồng tìm tài xế nhờ chiến lược **Caching** và tách biệt **Read-Replica**.
+    * Hệ thống duy trì ổn định, không bị sập khi có lượng truy cập đột biến (Burst traffic).
+
+### Đề xuất Cải tiến (Future Improvements)
+* **Nâng cao Bảo mật:**
+    * Triển khai **AWS WAF** (Web Application Firewall) trước ALB để chặn các tấn công phổ biến như SQL Injection và XSS.
+    * Bật **VPC Flow Logs** để ghi lại toàn bộ traffic mạng phục vụ việc phân tích và điều tra sự cố (Forensics).
+    * Tích hợp **DevSecOps Pipeline** (sử dụng công cụ như Trivy, Checkov) vào quy trình CI/CD để phát hiện lỗi cấu hình Terraform trước khi deploy.
+* **Nâng cao Hiệu năng:**
+    * Bổ sung **Circuit Breaker** và chính sách Timeout chuẩn cho giao tiếp Service-to-Service để tránh lỗi dây chuyền.
+    * Cân nhắc triển khai **Service Mesh** (như Istio hoặc Linkerd) để hỗ trợ mTLS và quản lý traffic thông minh hơn.
+    * Thay thế cơ chế Polling hiện tại bằng **WebSocket** hoặc **Server-Sent Events (SSE)** để cập nhật vị trí và trạng thái chuyến đi theo thời gian thực (Real-time) mượt mà hơn.
+
+
 
 
 
