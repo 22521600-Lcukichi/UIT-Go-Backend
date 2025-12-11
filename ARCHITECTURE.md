@@ -28,26 +28,8 @@ Module này tập trung giải quyết vấn đề chịu tải cao (High Concur
 
 ## Sơ đồ App Routing & Database Scaling
 
-```mermaid
-graph LR
-    Traffic[User Traffic] --> ALB[Load Balancer]
-    
-    subgraph Routing_Strategy
-        ALB -- "POST / PUT / DELETE" --> Write_Group[Write Endpoints]
-        ALB -- "GET (Read Heavy)" --> Read_Group[Read Endpoints]
-    end
-    
-    subgraph Database_Layer
-        Write_Group -->|Write| Primary[(RDS Primary)]
-        Read_Group -->|Read| Replica[(RDS Read Replica)]
-        Primary -.->|Async Replication| Replica
-    end
+![Sơ đồ App Routing & Database Scaling](https://github.com/22521600-Lcukichi/UIT-Go-Backend/blob/main/app%20routing.png)
 
-    subgraph Auto_Scaling
-        CW[CloudWatch Metrics] -->|Trigger CPU > 60%| ECS_ASG[ECS Auto Scaling]
-        ECS_ASG -->|Scale Out| Write_Group
-        ECS_ASG -->|Scale Out| Read_Group
-    end
-```
+
 
 
