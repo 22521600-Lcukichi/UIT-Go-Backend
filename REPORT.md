@@ -43,6 +43,30 @@ Hệ thống sử dụng mô hình **3-Tier** (Web, App, Data) bên trong một 
 * **Mô hình**: Hệ thống tách thành các dịch vụ độc lập: User Service (Django), Driver Service (Node.js), và Trip Service (Node.js). Mỗi dịch vụ có cơ sở dữ liệu riêng (Database per Service).
 * **Hạ tầng**: Sử dụng ALB (Application Load Balancer) để phân phối tải đến ECS Tasks (Container), với dữ liệu được lưu trữ phân tán giữa RDS (SQL), MongoDB (NoSQL) và ElastiCache (Redis).
 
+# B. Xử lý Bất đồng bộ (Asynchronous Processing) & Chống nghẽn
+
+Đây là kỹ thuật quan trọng nhất để xử lý các tác vụ nặng (như tìm tài xế):
+* **Cơ chế**: Thay vì xử lý đồng bộ (bắt người dùng chờ), hệ thống sử dụng Message Queue (SQS/Kafka). Khi người dùng tìm xe, yêu cầu được đẩy vào hàng đợi (enqueue "find-driver").
+* **Backpressure**: Hàng đợi giúp "hấp thụ" lượng request tăng đột biến (burst), ngăn không cho Driver Service bị quá tải (Overload). Service này sẽ tiêu thụ (consume) message từ hàng đợi theo khả năng xử lý của nó.
+* **Idempotency**: Để tránh xử lý trùng lặp (ví dụ: mạng lag khiến request gửi 2 lần), hệ thống sử dụng idempotency-key. Consumer sẽ kiểm tra key này trong Redis trước khi xử lý.
+
+# C. Chiến lược Caching (Bộ nhớ đệm)
+
+Nhóm áp dụng mô hình Cache-aside để giảm tải cho Database:
+* **Driver Location**: Vị trí tài xế được cache trong Redis với key driver:{id}:loc và TTL (Time-to-Live) ngắn (30 giây) để đảm bảo tính real-time tương đối.
+* **Trip Status**: Trạng thái chuyến đi được cache với TTL 60 giây.
+* **Logic**: Khi có request đọc, hệ thống kiểm tra Cache trước (Hit). Nếu không có (Miss), mới truy vấn vào Database và cập nhật lại Cache.
+
+# D. Tối ưu hóa Database (Read/Write Split)
+
+* **Phân tách Đọc/Ghi**: Sử dụng kiến trúc Master-Slave (Primary-Replica) cho RDS.
+  - Các lệnh ghi (POST/PUT/DELETE) được định tuyến vào RDS Primary.
+  - Các lệnh đọc nặng (GET heavy) được chuyển sang RDS Read Replica.
+* **Connection Pooling**: Giới hạn số lượng kết nối và thiết lập timeout (5s) để tránh treo Database.
+
+# E. Autoscaling (Tự động mở rộng)
+* **ECS Scaling**: Cấu hình Target Tracking dựa trên mức sử dụng CPU. Khi CPU vượt quá 60%, hệ thống tự động tăng số lượng Task (Container).
+
 
 
 
