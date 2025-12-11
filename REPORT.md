@@ -163,7 +163,7 @@ Nhóm thực hiện đã sử dụng phương pháp STRIDE kết hợp với Dat
 | **004** | **Quản lý định danh với AWS Cognito** | **Quyết định:** Sử dụng AWS Cognito User Pool thay vì tự xây dựng module Auth.<br><br>**Lý do:**<br> - **An toàn & Tốc độ:** Tránh lỗ hổng bảo mật tự code, giảm thời gian development.<br> - **Tính năng:** Có sẵn phát hiện đăng nhập đáng ngờ và tuân thủ Compliance. | - **Vendor Lock-in:** Phụ thuộc hoàn toàn vào hệ sinh thái AWS.<br>- **Chi phí:** Chi phí tăng tuyến tính theo số lượng người dùng hoạt động (MAU). |
 | **005** | **Caching & Read Replicas (Scalability)** | **Quyết định:** Dùng Redis Cache (TTL ngắn) và RDS Read Replicas.<br><br>**Lý do:**<br> - **Hiệu năng:** Giảm tải cho Primary DB, giảm p95 latency cho API tìm tài xế.<br> - **Tách biệt:** Tách luồng Đọc (Read) và Ghi (Write) để tối ưu throughput. | - **Tính nhất quán (Consistency):** Chấp nhận Eventual Consistency, dữ liệu đọc từ Replica có thể bị trễ (lag).<br>- **Dữ liệu cũ:** Cache có thể trả về vị trí cũ nếu TTL chưa hết hạn. |
 
-# 4. Thách thức & Bài học kinh nghiệm (Challenges & Lessons Learned)
+# 4. Thách thức & Bài học kinh nghiệm 
 
 ### Module C: Security (Bảo mật)
 * **Thách thức về Infrastructure as Code (IaC):**
@@ -192,7 +192,7 @@ Nhóm thực hiện đã sử dụng phương pháp STRIDE kết hợp với Dat
 
 ---
 
-# 5. Kết quả & Hướng phát triển (Results & Future Improvements)
+# 5. Kết quả & Hướng phát triển 
 
 ### Tóm tắt Kết quả (Results)
 * **Về Bảo mật (Module C):**
@@ -213,6 +213,7 @@ Nhóm thực hiện đã sử dụng phương pháp STRIDE kết hợp với Dat
     * Bổ sung **Circuit Breaker** và chính sách Timeout chuẩn cho giao tiếp Service-to-Service để tránh lỗi dây chuyền.
     * Cân nhắc triển khai **Service Mesh** (như Istio hoặc Linkerd) để hỗ trợ mTLS và quản lý traffic thông minh hơn.
     * Thay thế cơ chế Polling hiện tại bằng **WebSocket** hoặc **Server-Sent Events (SSE)** để cập nhật vị trí và trạng thái chuyến đi theo thời gian thực (Real-time) mượt mà hơn.
+
 
 
 
