@@ -118,7 +118,7 @@ Nhóm thực hiện đã sử dụng phương pháp STRIDE kết hợp với Dat
 
 ### C. Hiện thực hóa kỹ thuật (Implementation)
 
-1. Bảo mật tầng mạng (Network Security)
+### 1. Bảo mật tầng mạng (Network Security)
 
 * Đây là lớp bảo vệ mạnh mẽ nhất, áp dụng mô hình Zero Trust
 * **Kiến trúc mạng phân tầng**:
@@ -131,13 +131,13 @@ Nhóm thực hiện đã sử dụng phương pháp STRIDE kết hợp với Dat
 
 ![Sơ đồ App Routing & Database Scaling](https://github.com/22521600-Lcukichi/UIT-Go-Backend/blob/main/zero%20trust.png)
 
-2. Quản lý định danh và quyền truy cập (Identity & Access)
+### 2. Quản lý định danh và quyền truy cập (Identity & Access)
 * Authentication (User): Sử dụng AWS Cognito User Pool thay vì tự xây dựng DB user. Cấu hình chính sách mật khẩu mạnh (12 ký tự, chữ hoa/thường/số/ký tự đặc biệt) và bật chế độ bảo mật nâng cao (Advanced Security Mode: ENFORCED) để chặn đăng nhập đáng ngờ.
 * Authorization (Service): Sử dụng IAM Roles theo nguyên tắc Least Privilege.
   - Tách biệt Execution Role (chạy hạ tầng) và Task Role (logic ứng dụng).
   - Phân quyền chi tiết: Ví dụ DriverService có quyền sns:Publish để gửi thông báo, trong khi UserService thì không
  
-3. Bảo mật dữ liệu (Data Protection)
+### 3. Bảo mật dữ liệu (Data Protection)
 * **Encryption at Rest (Lưu trữ)**: Dữ liệu được mã hóa bằng AWS KMS với Customer Managed Key. Chế độ enable_key_rotation được bật để tự động xoay vòng khóa mỗi năm, giảm rủi ro khi lộ khóa.
 * **Secrets Management**: Không lưu cứng (hard-code) mật khẩu DB trong code. Sử dụng AWS Secrets Manager. Các ECS Task sẽ gọi API để lấy credentials đã được mã hóa KMS khi khởi động.
 * **Encryption in Transit (Truyền tải)**: Triển khai HTTPS/TLS cho Application Load Balancer (ALB) sử dụng chứng chỉ (Certificate) được quản lý bởi AWS ACM, ngăn chặn tấn công Man-in-the-Middle.
@@ -151,6 +151,7 @@ Nhóm thực hiện đã sử dụng phương pháp STRIDE kết hợp với Dat
 | **Database Access** | Isolated Subnets (No Internet) | Khó khăn khi debug/patching DB (cần Bastion Host). | Loại bỏ hoàn toàn vector tấn công từ Internet vào Database. |
 | **Encryption** | KMS Customer Managed Key | Tăng chi phí mỗi tháng + phí API call. | Kiểm soát hoàn toàn vòng đời khóa (Key Lifecycle). |
 | **Secrets** | Secrets Manager | Đắt hơn Parameter Store (tính phí theo mỗi Secret). | Hỗ trợ tự động xoay vòng password (Auto-rotation) với RDS. |
+
 
 
 
