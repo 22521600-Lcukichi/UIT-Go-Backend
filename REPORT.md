@@ -126,7 +126,8 @@ Nhóm thực hiện đã sử dụng phương pháp STRIDE kết hợp với Dat
   - **Isolated Data Subnet** được thiết kế như một "két sắt": Không có đường Route ra Internet, ngăn chặn hoàn toàn khả năng kẻ tấn công tải dữ liệu ra ngoài (Data Exfiltration).
 * Sơ đồ Zero Trust Network:
 
-![Sơ đồ App Routing & Database Scaling](https://github.com/22521600-Lcukichi/UIT-Go-Backend/blob/main/app%20routing.png)
+![Sơ đồ App Routing & Database Scaling](https://github.com/22521600-Lcukichi/UIT-Go-Backend/blob/main/zero%20trust.png)
+
 
 
 
