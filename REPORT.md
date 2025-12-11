@@ -1,6 +1,6 @@
 # 1. Tổng quan kiến trúc hệ thống
 
-# 🏗 Kiến trúc Hệ thống UIT-Go
+## 🏗 Kiến trúc Hệ thống UIT-Go
 
 Hệ thống **UIT-Go** được thiết kế theo kiến trúc **Cloud-Native Microservices**, triển khai trên nền tảng **Amazon Web Services (AWS)** để đảm bảo tính linh hoạt và khả năng mở rộng.
 
@@ -105,6 +105,17 @@ Nhóm đã sử dụng công cụ k6 để kiểm thử chịu tải với các 
 * **Zero Trust Architecture (ZTA)**: Loại bỏ niềm tin ngầm định (implicit trust). Giả định rằng mạng nội bộ đã bị xâm nhập, do đó mọi luồng traffic (kể cả giữa các microservices) đều phải được xác thực và cấp quyền tối thiểu.
 * **Defense-in-Depth (Phòng thủ chiều sâu)**: Thiết lập nhiều lớp bảo vệ chồng lên nhau (Network, Application, Data). Nếu một lớp bị phá vỡ, các lớp khác vẫn bảo vệ được hệ thống.
 * **Least Privilege (Đặc quyền tối thiểu)**: Mỗi thành phần (User, Service, Role) chỉ được cấp quyền vừa đủ để thực hiện chức năng, không hơn.
+
+### B. Phân tích mối đe dọa (Threat Modeling)
+
+Nhóm thực hiện đã sử dụng phương pháp STRIDE kết hợp với Data Flow Diagram (DFD) để phân tích rủi ro dựa trên các vùng tin cậy (Trust Boundaries).
+
+* **Trust Boundaries**: Hệ thống được chia thành 4 vùng: Internet (Untrusted), DMZ (Semi-Trusted - chứa API Gateway), Private Network (Trusted - chứa Microservices), và Restricted Zone (Highly Sensitive - chứa Databases) .
+* **Các mối đe dọa và giải pháp tiêu biểu:**
+  - Spoofing/Identity: Chống Brute-force bằng Rate Limiting và CAPTCHA; Chống GPS Spoofing của tài xế bằng xác thực chữ ký GPS metadata.
+  - Tampering: Chống sửa đổi dữ liệu chuyến đi bằng Idempotency Key và Distributed Lock (Redis) để tránh Race condition.
+  - Information Disclosure: Ngăn chặn lộ dữ liệu vị trí tài xế (Real-time location) bằng cách phân trang (pagination) và làm mờ vị trí (fuzzy location) khi cần thiết.
+
 
 
 
