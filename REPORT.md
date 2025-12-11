@@ -78,13 +78,14 @@ Nhóm áp dụng mô hình Cache-aside để giảm tải cho Database:
 ## Đánh giá Kết quả và Kiểm chứng (Load Testing)
 
 Nhóm đã sử dụng công cụ k6 để kiểm thử chịu tải với các kịch bản thực tế (Tìm tài xế, Tạo chuyến, Cập nhật vị trí).
-
 * **Kết quả**
+  
 | Chỉ số | Baseline (Trước tối ưu) | Optimized (Sau tối ưu) | Cải thiện |
 | :--- | :--- | :--- | :--- |
 | **Throughput (RPS)** | 300 RPS | **600 RPS** | ⬆️ Tăng gấp đôi |
 | **Độ trễ (Latency p95)** | ~350ms | **~180ms** | ⬇️ Giảm ~48% |
 | **Tỷ lệ lỗi (Error Rate)**| 3% | **< 1%** | ✅ Ổn định hơn |
+
 
 
 
