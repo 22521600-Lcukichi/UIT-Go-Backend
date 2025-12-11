@@ -90,13 +90,14 @@ Nhóm đã sử dụng công cụ k6 để kiểm thử chịu tải với các 
 
 | Quyết định thiết kế | Lợi ích chính (Pros) | Đánh đổi / Rủi ro (Cons) |
 | :--- | :--- | :--- |
-| **Queue (SQS/Kafka) cho tìm xe** | Hấp thụ tải đột biến (burst), tránh gây nghẽn cho Driver Service. | [cite_start]Độ trễ (Latency) tăng; hệ thống phức tạp hơn; bắt buộc phải xử lý `idempotency` và có `DLQ` (Dead Letter Queue). [cite: 1349] |
-| **Cache Redis (loc/trip) TTL 20-60s** | Giảm tải cho Database, chỉ số độ trễ `p95` giảm đáng kể. | [cite_start]Dữ liệu có thể bị cũ (stale); cần cân bằng kỹ giữa thời gian sống (TTL) và việc làm mới cache. [cite: 1349] |
-| **Read/Write split (Primary + Replica)** | Tăng throughput (lưu lượng xử lý) cho các tác vụ đọc. | [cite_start]Gặp vấn đề `Replication lag` dẫn đến tính nhất quán cuối cùng (eventual consistency); không dùng được cho các giao dịch cần tính nhất quán mạnh. [cite: 1352] |
-| **Autoscaling ECS (target tracking)** | Hệ thống tự động mở rộng tài nguyên khi tải tăng. | [cite_start]Nếu cấu hình ngưỡng sai dễ gây hiện tượng scale lên xuống liên tục ("ping-pong"); chi phí biến động; cần thiết lập `min/max tasks` hợp lý. [cite: 1352] |
-| **Compression + HTTP/2** | Giảm băng thông (bandwidth) và TTFB (Time To First Byte), cải thiện độ trễ. | [cite_start]Tăng nhẹ mức sử dụng CPU để nén/giải nén; cần kiểm thử tính tương thích với phía Client. [cite: 1352] |
-| **Async hóa luồng phụ (enqueue)** | Bảo vệ các service lõi, giúp hệ thống chịu tải tốt hơn. | [cite_start]Người dùng có thể cảm thấy phản hồi chậm hơn; cần thiết kế UX và thông báo trạng thái rõ ràng để người dùng biết. [cite: 1352] |
-| **TTL ngắn vs dài cho cache** | **TTL dài:** Tỷ lệ cache hit cao, giảm tải DB tối đa. | **TTL dài:** Dữ liệu dễ bị cũ (stale). [cite_start]<br> **TTL ngắn:** Cache miss nhiều, hiệu quả giảm tải thấp hơn. [cite: 1352] |
+| **Queue (SQS/Kafka) cho tìm xe** | Hấp thụ tải đột biến (burst), tránh gây nghẽn cho Driver Service. | Độ trễ (Latency) tăng; hệ thống phức tạp hơn; bắt buộc phải xử lý `idempotency` và có `DLQ` (Dead Letter Queue).  |
+| **Cache Redis (loc/trip) TTL 20-60s** | Giảm tải cho Database, chỉ số độ trễ `p95` giảm đáng kể. | Dữ liệu có thể bị cũ (stale); cần cân bằng kỹ giữa thời gian sống (TTL) và việc làm mới cache. |
+| **Read/Write split (Primary + Replica)** | Tăng throughput (lưu lượng xử lý) cho các tác vụ đọc. | Gặp vấn đề `Replication lag` dẫn đến tính nhất quán cuối cùng (eventual consistency); không dùng được cho các giao dịch cần tính nhất quán mạnh.  |
+| **Autoscaling ECS (target tracking)** | Hệ thống tự động mở rộng tài nguyên khi tải tăng. | Nếu cấu hình ngưỡng sai dễ gây hiện tượng scale lên xuống liên tục ("ping-pong"); chi phí biến động; cần thiết lập `min/max tasks` hợp lý.  |
+| **Compression + HTTP/2** | Giảm băng thông (bandwidth) và TTFB (Time To First Byte), cải thiện độ trễ. |Tăng nhẹ mức sử dụng CPU để nén/giải nén; cần kiểm thử tính tương thích với phía Client. |
+| **Async hóa luồng phụ (enqueue)** | Bảo vệ các service lõi, giúp hệ thống chịu tải tốt hơn. | Người dùng có thể cảm thấy phản hồi chậm hơn; cần thiết kế UX và thông báo trạng thái rõ ràng để người dùng biết. |
+| **TTL ngắn vs dài cho cache** | **TTL dài:** Tỷ lệ cache hit cao, giảm tải DB tối đa. | **TTL dài:** Dữ liệu dễ bị cũ (stale).  **TTL ngắn:** Cache miss nhiều, hiệu quả giảm tải thấp hơn.  |
+
 
 
 
