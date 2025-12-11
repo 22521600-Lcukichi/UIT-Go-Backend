@@ -30,6 +30,51 @@ Module này tập trung giải quyết vấn đề chịu tải cao (High Concur
 
 ![Sơ đồ App Routing & Database Scaling](https://github.com/22521600-Lcukichi/UIT-Go-Backend/blob/main/app%20routing.png)
 
+---
+
+# 3. Module C: Thiết kế Bảo mật (Security Design)
+
+## Nguyên tắc thiết kế
+Module này áp dụng kiến trúc **Zero Trust** và **Defense-in-Depth** (Phòng thủ chiều sâu). Hệ thống không tin tưởng bất kỳ luồng traffic nào, kể cả bên trong mạng nội bộ. Bảo mật được thiết lập qua nhiều lớp:
+1.  **Network Layer:** Sử dụng **NACLs** (Stateless firewall ở cấp Subnet) và **Security Groups** (Stateful firewall ở cấp Instance).
+2.  **Identity Layer:** Quản lý định danh tập trung bằng **AWS Cognito**.
+3.  **Data Layer:** Mã hóa dữ liệu lưu trữ (At-rest) bằng **AWS KMS** và quản lý bí mật bằng **Secrets Manager**.
+
+## Sơ đồ Bảo mật Mạng (Network Security Flow)
+
+```mermaid
+flowchart TD
+    Internet((Internet Threat)) -- Port 443 --> WAF[AWS WAF & Shield]
+    WAF -- Filtered Traffic --> ALB_SG[ALB Security Group]
+    
+    subgraph Defense_Layers [Defense-in-Depth Layers]
+        direction TB
+        
+        subgraph Layer_1_Public [Lớp 1: Public Interface]
+            ALB_SG -- Allow TCP/443 --> ALB[App Load Balancer]
+            NACL_Public[NACL: Allow HTTPS Inbound] -.-> ALB
+        end
+
+        subgraph Layer_2_App [Lớp 2: Microservices]
+            ALB -- Port 8080 --> ECS_SG[ECS Tasks SG]
+            ECS_SG -- Allow TCP/8080 from ALB Only --> ECS[ECS Containers]
+            NACL_App[NACL: Allow Traffic from Public Subnet] -.-> ECS
+        end
+
+        subgraph Layer_3_Data [Lớp 3: Isolated Data]
+            ECS -- Port 5432/6379 --> DB_SG[Database SG]
+            DB_SG -- Allow from ECS SG Only --> RDS[(RDS / Redis)]
+            NACL_Data[NACL: DENY ALL Internet] -.-> RDS
+        end
+    end
+    
+    Secrets[AWS Secrets Manager] -.->|Inject Credentials at Runtime| ECS
+    KMS[AWS KMS Key] -.->|Encrypt| RDS
+    Cognito[AWS Cognito] -.->|Issue JWT| Internet
+
+    style NACL_Data fill:#ffcccc,stroke:#f00,stroke-width:2px,stroke-dasharray: 5 5
+
+
 
 
 
