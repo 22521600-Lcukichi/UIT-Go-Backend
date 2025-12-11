@@ -1,8 +1,5 @@
 # 3. Defense-in-Depth Network Security Architecture
 
-* **Trạng thái:** Đã chấp nhận
-* **Ngày:** 2025-11-01
-
 ## Bối cảnh
 Mô hình Zero Trust yêu cầu không tin tưởng bất kỳ luồng traffic nào, kể cả trong mạng nội bộ. Chỉ sử dụng Security Groups (SGs) là chưa đủ để đảm bảo an toàn nếu một tầng bị xâm nhập.
 
