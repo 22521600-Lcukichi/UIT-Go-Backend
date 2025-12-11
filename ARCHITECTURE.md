@@ -28,6 +28,7 @@ Module này tập trung giải quyết vấn đề chịu tải cao (High Concur
 
 ## Sơ đồ App Routing & Database Scaling
 
+```mermaid
 graph LR
     Traffic[User Traffic] --> ALB[Load Balancer]
     
@@ -47,5 +48,6 @@ graph LR
         ECS_ASG -->|Scale Out| Write_Group
         ECS_ASG -->|Scale Out| Read_Group
     end
+```
 
 
