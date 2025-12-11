@@ -14,7 +14,7 @@ Hệ thống UIT-Go được thiết kế theo kiến trúc **Microservices** v�
 
 --- 
 
-# 3. Module A: Scalability & Performance Design
+# 2. Module A: Scalability & Performance Design
 
 ## Chiến lược mở rộng
 Module này tập trung giải quyết vấn đề chịu tải cao (High Concurrency) cho luồng nghiệp vụ "Đặt xe" (Booking) và "Tìm tài xế" (Find Driver).
@@ -24,36 +24,6 @@ Module này tập trung giải quyết vấn đề chịu tải cao (High Concur
 
 ## Sơ đồ Luồng dữ liệu "Tìm tài xế" (Async Booking Flow)
 
-```mermaid
-sequenceDiagram
-    participant Client
-    participant APIGW as API Gateway
-    participant TripSvc as Trip Service
-    participant Queue as SQS/Kafka
-    participant DriverSvc as Driver Service
-    participant Redis as Redis Cache
-    participant DB as MongoDB
-
-    Note over Client, APIGW: 1. User gửi yêu cầu đặt xe
-    Client->>APIGW: POST /api/trips
-    APIGW->>TripSvc: Forward Request
-    
-    Note over TripSvc: Xử lý logic cơ bản & ghi nhận chuyến
-    TripSvc->>Queue: Push Message (find-driver)
-    TripSvc-->>Client: Trả về 202 Accepted (Processing)
-    
-    Note over Queue, DriverSvc: Xử lý bất đồng bộ (Async)
-    loop Polling / Consuming
-        DriverSvc->>Queue: Lấy Message đặt xe
-        DriverSvc->>Redis: GET /drivers/nearby (Cache Check)
-        alt Cache Hit
-            Redis-->>DriverSvc: Trả về list driver IDs
-        else Cache Miss
-            DriverSvc->>DB: Geospatial Query
-            DB-->>DriverSvc: List drivers
-            DriverSvc->>Redis: Set Cache (TTL 30s)
-        end
-        DriverSvc->>DriverSvc: Logic Matching & Tính giá
-    end
+![Sơ đồ Luồng dữ liệu "Tìm tài xế" (Async Booking Flow)](https://github.com/22521600-Lcukichi/UIT-Go-Backend/blob/main/Async%20Booking%20Flow.png)
 
 
