@@ -124,9 +124,13 @@ Nhóm thực hiện đã sử dụng phương pháp STRIDE kết hợp với Dat
 * **Kiến trúc mạng phân tầng**:
   - Sử dụng **VPC** chia thành 3 loại subnet trên 2 Availability Zones (Multi-AZ): Public (ALB, NAT), Private (ECS Tasks), và Isolated Data (Databases) .
   - **Isolated Data Subnet** được thiết kế như một "két sắt": Không có đường Route ra Internet, ngăn chặn hoàn toàn khả năng kẻ tấn công tải dữ liệu ra ngoài (Data Exfiltration).
+ * **Firewall 2 lớp (Stateful & Stateless):**
+  - Security Groups (Stateful): Thiết kế theo chuỗi xích (Chaining). ECS Tasks SG chỉ chấp nhận traffic từ ALB SG. RDS SG chỉ chấp nhận traffic từ ECS Tasks SG. Không cho phép truy cập trực tiếp từ IP lạ.
+- Network ACLs (Stateless): Đây là lớp bảo vệ thứ 2 cực kỳ nghiêm ngặt. Tại Isolated Data Subnet, NACL chặn mặc định tất cả traffic từ Internet (0.0.0.0/0), chỉ cho phép traffic nội bộ VPC.
 * Sơ đồ Zero Trust Network:
 
 ![Sơ đồ App Routing & Database Scaling](https://github.com/22521600-Lcukichi/UIT-Go-Backend/blob/main/zero%20trust.png)
+
 
 
 
