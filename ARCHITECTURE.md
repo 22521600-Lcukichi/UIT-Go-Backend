@@ -10,4 +10,5 @@ Hệ thống UIT-Go được thiết kế theo kiến trúc **Microservices** v�
 
 ## Sơ đồ Kiến trúc (High-Level Diagram)
 
-![Sơ đồ kiến trúc tổng quan AWS](https://github.com/user/repo/path/to/your/uploaded-image.png)
+![Sơ đồ kiến trúc tổng quan AWS](https://github.com/22521600-Lcukichi/UIT-Go-Backend/blob/main/system%20overview.png)
+
