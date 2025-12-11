@@ -120,11 +120,12 @@ Nhóm thực hiện đã sử dụng phương pháp STRIDE kết hợp với Dat
 
 1. Bảo mật tầng mạng (Network Security)
 
-  - Đây là lớp bảo vệ mạnh mẽ nhất, áp dụng mô hình Zero Trust:
+  Đây là lớp bảo vệ mạnh mẽ nhất, áp dụng mô hình Zero Trust:
 
 * **Kiến trúc mạng phân tầng**:
   - Sử dụng **VPC** chia thành 3 loại subnet trên 2 Availability Zones (Multi-AZ): Public (ALB, NAT), Private (ECS Tasks), và Isolated Data (Databases) .
   - **Isolated Data Subnet** được thiết kế như một "két sắt": Không có đường Route ra Internet, ngăn chặn hoàn toàn khả năng kẻ tấn công tải dữ liệu ra ngoài (Data Exfiltration).
+
 
 
 
