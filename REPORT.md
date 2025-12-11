@@ -32,6 +32,18 @@ Hệ thống sử dụng mô hình **3-Tier** (Web, App, Data) bên trong một 
 
 ![Sơ đồ kiến trúc tổng quan AWS](https://github.com/22521600-Lcukichi/UIT-Go-Backend/blob/main/system%20overview.png)
 
+--- 
+
+# 2. Phân tích Module chuyên sâu
+
+# MODULE A: Scalability & Performance
+
+# A. Kiến trúc Microservices & Phân tầng (3-Tier)
+
+* **Mô hình**: Hệ thống tách thành các dịch vụ độc lập: User Service (Django), Driver Service (Node.js), và Trip Service (Node.js). Mỗi dịch vụ có cơ sở dữ liệu riêng (Database per Service).
+* **Hạ tầng**: Sử dụng ALB (Application Load Balancer) để phân phối tải đến ECS Tasks (Container), với dữ liệu được lưu trữ phân tán giữa RDS (SQL), MongoDB (NoSQL) và ElastiCache (Redis).
+
+
 
 
 
