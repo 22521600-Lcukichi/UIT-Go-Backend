@@ -1,4 +1,4 @@
-# 2. Sử dụng Message Queue cho luồng tìm tài xế
+# 2. Asynchronous Communication with Message Queue
 
 ## Bối cảnh
 Trong luồng nghiệp vụ "Đặt xe" (Booking), TripService cần gọi sang DriverService để tìm tài xế phù hợp. Khi lượng yêu cầu đặt xe tăng đột biến (burst), việc gọi REST API đồng bộ trực tiếp có thể gây nghẽn và làm sập DriverService do quá tải.
